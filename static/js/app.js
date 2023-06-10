@@ -18,7 +18,7 @@ function inint(){
         }
         displayMetaData(names[0])
         displayBarchrat(names[0])
-        //displayBubbleChart(names[0])
+        displayBubleChart(names[0])
 
     });
 
@@ -26,6 +26,7 @@ function inint(){
 function optionChanged(numID){
     displayMetaData(numID)
     displayBarchrat(numID)
+    displayBubleChart(numID)
 }
 // Display each key-value pair 
 //from the metadata JSON object somewhere on the page
@@ -36,16 +37,16 @@ function displayMetaData(numID){
     d3.json(url).then((data) => {
 
         let metadata = data.metadata;
-
+        //console.log("metadata",metadata)
         // get data of the selected numId
         function returnNumID(num){
             return num.id == numID
         }
         selectedId = metadata.filter(returnNumID)[0]
-
+        
         metadaTable.html("") //clear before
 
-        // 
+        // get key value, add to a heder to display
         Object.entries(selectedId).forEach(entry => {
         const [key, value] = entry;
         console.log(key, value);
@@ -56,11 +57,10 @@ function displayMetaData(numID){
     })
 } 
 
-inint()
+
 
 function displayBarchrat(numID){
     
-
     d3.json(url).then((data) => {
 
         let samplesData = data.samples;
@@ -71,6 +71,7 @@ function displayBarchrat(numID){
         }
         selectedId = samplesData.filter(returnNumID)[0]
         console.log(selectedId)
+        
         let otu_ids = selectedId.otu_ids
         let sample_values = selectedId.sample_values
         let otu_labels = selectedId.otu_labels
@@ -79,16 +80,13 @@ function displayBarchrat(numID){
             x: sample_values.slice(0,10).reverse(),
             y: otu_ids.slice(0,10).map(x => `otu ${x}`).reverse(),
             text: otu_labels.slice(0,10).reverse(),
-            
             orientation: 'h',
-            
             type: 'bar'
           }];
           
           
           let layout = {
             title: 'Colored Bar Chart',
-            
           };
           
           Plotly.newPlot('bar', barData, layout);
@@ -115,10 +113,25 @@ function displayBubleChart(numID){
         let otu_labels = selectedId.otu_labels
 
         let bubleData = [{
-            x: 
-            y: 
-        }]
+            x: otu_ids,
+            y: sample_values,
+            marker: {
+                size: sample_values,
+                color: otu_ids,
+                colorscale: 'Portland'
+            },
+            text: otu_labels,
+            mode: "markers"
 
+        }];
 
-    }
+        let layout = {
+            xaxis: {title: "OTU_ID"} 
+        };
+
+        Plotly.newPlot("bubble",bubleData, layout)
+    })
 }
+
+
+inint()
